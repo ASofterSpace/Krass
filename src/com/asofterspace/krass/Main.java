@@ -7,6 +7,7 @@ package com.asofterspace.krass;
 import java.util.List;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
+import com.asofterspace.toolbox.io.PdfFile;
 import com.asofterspace.toolbox.Utils;
 
 
@@ -23,7 +24,11 @@ public class Main {
 		Utils.setVersionNumber(VERSION_NUMBER);
 		Utils.setVersionDate(VERSION_DATE);
 		
-		addDisclaimerToProject("D:/prog/asofterspace/Toolbox-Java/src/com/asofterspace/toolbox");
+		// addDisclaimerToProject("D:/prog/asofterspace/Toolbox-Java/src/com/asofterspace/toolbox");
+		
+		PdfFile pdf = new PdfFile("blubb.pdf");
+		pdf.create("blubb");
+		pdf.save();
 	}
 	
 	private static void addDisclaimerToProject(String projectPath) {
