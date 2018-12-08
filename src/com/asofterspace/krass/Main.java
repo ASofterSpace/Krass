@@ -23,11 +23,13 @@ public class Main {
 		Utils.setVersionNumber(VERSION_NUMBER);
 		Utils.setVersionDate(VERSION_DATE);
 		
-		addDisclaimerToProject("D:/prog/asofterspace/Krass/src/com/asofterspace/krass");
+		addDisclaimerToProject("D:/prog/asofterspace/Toolbox-Java/src/com/asofterspace/toolbox");
 	}
 	
 	private static void addDisclaimerToProject(String projectPath) {
 
+		Directory addDisclaimerDir = new Directory(projectPath);
+		
 		boolean recursively = true;
 		
 		List<File> allFiles = addDisclaimerDir.getAllFiles(recursively);
