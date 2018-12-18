@@ -14,8 +14,8 @@ import com.asofterspace.toolbox.Utils;
 public class Main {
 	
 	public final static String PROGRAM_TITLE = "Krass";
-	public final static String VERSION_NUMBER = "0.0.0.1(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "8. December 2018";
+	public final static String VERSION_NUMBER = "0.0.0.2(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "8. December 2018 - 18. December 2018";
 	
 	public static void main(String[] args) {
 		
@@ -24,7 +24,7 @@ public class Main {
 		Utils.setVersionNumber(VERSION_NUMBER);
 		Utils.setVersionDate(VERSION_DATE);
 		
-		// addDisclaimerToProject("D:/prog/asofterspace/Toolbox-Java/src/com/asofterspace/toolbox");
+		// addDisclaimerToProject("D:/prog/asofterspace/assAddressBook/src");
 		
 		PdfFile pdf = new PdfFile("blubb.pdf");
 		pdf.create("blubb");

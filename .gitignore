@@ -32,3 +32,6 @@ src/com/asofterspace/toolbox
 
 # config files
 config
+
+# output files
+*.pdf
