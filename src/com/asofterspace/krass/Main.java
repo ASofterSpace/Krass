@@ -4,11 +4,15 @@
  */
 package com.asofterspace.krass;
 
-import java.util.List;
 import com.asofterspace.toolbox.io.Directory;
+import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.PdfFile;
+import com.asofterspace.toolbox.io.PdfObject;
 import com.asofterspace.toolbox.Utils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 
 public class Main {
@@ -29,6 +33,10 @@ public class Main {
 		PdfFile pdf = new PdfFile("blubb.pdf");
 		pdf.create("blubb");
 		pdf.save();
+		
+		exportPicsFromPdf("ex3.pdf");
+		
+		replacePicsInPdf("ex3.pdf", "ex3_out.pdf", "picex3.pdf/newpic.jpg");
 	}
 	
 	private static void addDisclaimerToProject(String projectPath) {
@@ -51,6 +59,76 @@ public class Main {
 				file.save();
 			}
 		}
+	}
+	
+	private static void exportPicsFromPdf(String pdfPath) {
+	
+		PdfFile pdf = new PdfFile(pdfPath);
+		List<PdfObject> objects = pdf.getObjects();
+		
+		for (PdfObject obj : objects) {
+			if ("/XObject".equals(obj.getDictValue("/Type"))) {
+				if ("/Image".equals(obj.getDictValue("/Subtype"))) {
+					System.out.println("");
+					System.out.println("Found image " + obj.getNumber() + ":");
+					System.out.println("width: " + obj.getDictValue("/Width"));
+					System.out.println("height: " + obj.getDictValue("/Height"));
+					String filter = obj.getDictValue("/Filter");
+					if (filter == null) {
+						filter = "null";
+					}
+					System.out.println("filter: " + filter);
+					switch (filter) {
+						case "/DCTDecode": //JPEG
+						case "/JPX": // JPEG2000
+							BinaryFile jpgFile = new BinaryFile("out" + pdfPath + "/Image" + obj.getNumber() + ".jpg");
+							jpgFile.saveContent(obj.getStreamContent());
+							break;
+						case "/FlateDecode": // PNG? or just generic, could be anything?
+							BinaryFile pngFile = new BinaryFile("out" + pdfPath + "/Image" + obj.getNumber() + ".png");
+							pngFile.saveContent(obj.getPlainStreamContent());
+							break;
+						default:
+							System.out.println("The image cannot be saved as the filter is not understood! :(");
+							break;
+					}
+				}
+			}
+		}
+	}
+	
+	private static void replacePicsInPdf(String origPdfPath, String newPdfPath, String newPicPath) {
+	
+		File oldFile = new File(origPdfPath);
+		oldFile.copyToDisk(newPdfPath);
+	
+		PdfFile pdf = new PdfFile(newPdfPath);
+		List<PdfObject> objects = pdf.getObjects();
+		
+		BinaryFile newPicFile = new BinaryFile(newPicPath);
+		String newPicContent = newPicFile.loadContentStr();
+
+		for (PdfObject obj : objects) {
+			if ("/XObject".equals(obj.getDictValue("/Type"))) {
+				if ("/Image".equals(obj.getDictValue("/Subtype"))) {
+					System.out.println("");
+					System.out.println("Found image " + obj.getNumber() + ":");
+					System.out.println("width: " + obj.getDictValue("/Width"));
+					System.out.println("height: " + obj.getDictValue("/Height"));
+					obj.setDictValue("/ColorSpace", "/DeviceRGB");
+					obj.setDictValue("/BitsPerComponent", "8");
+					obj.setDictValue("/Filter", "/DCTDecode");
+					obj.setDictValue("/Interpolate", "true");
+					obj.setDictValue("/Width", "640");
+					obj.setDictValue("/Height", "853");
+					obj.removeDictValue("/SMask");
+					obj.removeDictValue("/Matte");
+					obj.setStreamContent(newPicContent);
+				}
+			}
+		}
+		
+		pdf.save();
 	}
 	
 }
