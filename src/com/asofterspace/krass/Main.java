@@ -9,6 +9,7 @@ import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.PdfFile;
 import com.asofterspace.toolbox.io.PdfObject;
+import com.asofterspace.toolbox.io.SimpleFile;
 import com.asofterspace.toolbox.Utils;
 
 import java.util.List;
@@ -27,8 +28,9 @@ public class Main {
 		Utils.setVersionNumber(VERSION_NUMBER);
 		Utils.setVersionDate(VERSION_DATE);
 
-		// addDisclaimerToProject("D:/prog/asofterspace/assAddressBook/src");
+		// addDisclaimerToProject("D:/prog/asofterspace/CdmScriptEditor/src");
 
+		/*
 		PdfFile pdf = new PdfFile("blubb.pdf");
 		pdf.create("blubb");
 		pdf.save();
@@ -38,6 +40,7 @@ public class Main {
 		replacePicsInPdf("ex3.pdf", "ex3_out.pdf", "picex3.pdf/newpic.jpg");
 
 		uncompressPdf("ex_compressed.pdf", "ex_uncompressed.pdf");
+		*/
 	}
 
 	private static void addDisclaimerToProject(String projectPath) {
@@ -50,14 +53,15 @@ public class Main {
 
 		for (File file : allFiles) {
 			if (file.getFilename().endsWith(".java")) {
+				SimpleFile simpleFile = new SimpleFile(file);
 				String newContent =
 					"/**\r\n" +
-					" * Unlicensed code created by A Softer Space, 2018\r\n" +
+					" * Unlicensed code created by A Softer Space, 2019\r\n" +
 					" * www.asofterspace.com/licenses/unlicense.txt\r\n" +
 					" */\r\n" +
-					file.getContent();
-				file.setContent(newContent);
-				file.save();
+					simpleFile.getContent();
+				simpleFile.setContent(newContent);
+				simpleFile.save();
 			}
 		}
 	}
@@ -83,11 +87,11 @@ public class Main {
 						case "/DCTDecode": //JPEG
 						case "/JPX": // JPEG2000
 							BinaryFile jpgFile = new BinaryFile("out" + pdfPath + "/Image" + obj.getNumber() + ".jpg");
-							jpgFile.saveContent(obj.getStreamContent());
+							jpgFile.saveContentStr(obj.getStreamContent());
 							break;
 						case "/FlateDecode": // PNG? or just generic, could be anything?
 							BinaryFile pngFile = new BinaryFile("out" + pdfPath + "/Image" + obj.getNumber() + ".png");
-							pngFile.saveContent(obj.getPlainStreamContent());
+							pngFile.saveContentStr(obj.getPlainStreamContent());
 							break;
 						default:
 							System.out.println("The image cannot be saved as the filter is not understood! :(");
