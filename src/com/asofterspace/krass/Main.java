@@ -28,6 +28,8 @@ public class Main {
 		Utils.setVersionNumber(VERSION_NUMBER);
 		Utils.setVersionDate(VERSION_DATE);
 
+		exportPicsFromPdf("ex.pdf");
+
 		// addDisclaimerToProject("D:/prog/asofterspace/CdmScriptEditor/src");
 
 		/*
@@ -80,10 +82,15 @@ public class Main {
 					System.out.println("height: " + obj.getDictValue("/Height"));
 					String filter = obj.getDictValue("/Filter");
 					if (filter == null) {
-						filter = "null";
+						filter = "";
 					}
 					System.out.println("filter: " + filter);
 					switch (filter) {
+						case "": // Portable Pix Map
+							BinaryFile ppmFile = new BinaryFile("out" + pdfPath + "/Image" + obj.getNumber() + ".ppm");
+							String header = "P6\n" + obj.getDictValue("/Width") + " " + obj.getDictValue("/Height") + "\n255\n";
+							ppmFile.saveContentStr(header + obj.getPlainStreamContent());
+							break;
 						case "/DCTDecode": //JPEG
 						case "/JPX": // JPEG2000
 							BinaryFile jpgFile = new BinaryFile("out" + pdfPath + "/Image" + obj.getNumber() + ".jpg");
@@ -95,8 +102,21 @@ public class Main {
 							break;
 						default:
 							System.out.println("The image cannot be saved as the filter is not understood! :(");
+							BinaryFile otherFile = new BinaryFile("out" + pdfPath + "/Image" + obj.getNumber() + ".bmp");
+							otherFile.saveContentStr(obj.getPlainStreamContent());
 							break;
 					}
+				}
+			} else {
+				String filter = obj.getDictValue("/Filter");
+				if (filter == null) {
+					filter = "null";
+				}
+				switch (filter) {
+					case "/ASCIIHexDecode":
+						BinaryFile hexFile = new BinaryFile("out" + pdfPath + "/Data" + obj.getNumber() + ".txt");
+						hexFile.saveContentStr(obj.getPlainStreamContent());
+						break;
 				}
 			}
 		}
