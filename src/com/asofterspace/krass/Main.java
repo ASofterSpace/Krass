@@ -66,6 +66,24 @@ public class Main {
 
 		System.out.println(code);
 
+
+		// write an exemplary bitmap mask as ppm file
+		Image img = new Image(29, 29);
+		ColorRGB black = new ColorRGB(0, 0, 0);
+
+		for (int x = 0; x < 29; x++) {
+			for (int y = 0; y < 29; y++) {
+				if (((x*y)%3 + x + y) % 2 == 0) {
+					img.setPixel(x, y, black);
+				}
+			}
+		}
+
+		PpmFile outFile = new PpmFile("mask.ppm");
+		outFile.assign(img);
+		outFile.save();
+
+
 		// addDisclaimerToProject("D:/prog/asofterspace/CdmScriptEditor/src");
 
 		/*

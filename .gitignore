@@ -35,3 +35,4 @@ config
 
 # output files
 *.pdf
+*.ppm
