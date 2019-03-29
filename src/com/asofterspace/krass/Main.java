@@ -137,6 +137,7 @@ public class Main {
 					System.out.println("filter: " + filter);
 					switch (filter) {
 						case "": // Portable Pix Map
+							// TODO :: do something about the ICCBased ColorSpace? (right now we are just ignoring it...)
 							BinaryFile ppmFile = new BinaryFile("out" + pdfPath + "/Image" + obj.getNumber() + ".ppm");
 							String header = "P6\n" + obj.getDictValue("/Width") + " " + obj.getDictValue("/Height") + "\n255\n";
 							ppmFile.saveContentStr(header + obj.getPlainStreamContent());
