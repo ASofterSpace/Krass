@@ -12,6 +12,8 @@ import com.asofterspace.toolbox.io.PdfFile;
 import com.asofterspace.toolbox.io.PdfObject;
 import com.asofterspace.toolbox.io.PpmFile;
 import com.asofterspace.toolbox.io.SimpleFile;
+import com.asofterspace.toolbox.utils.ColorRGB;
+import com.asofterspace.toolbox.utils.Image;
 import com.asofterspace.toolbox.Utils;
 
 import java.util.List;
@@ -33,11 +35,6 @@ public class Main {
 		exportPicsFromPdf("ex.pdf");
 
 		PpmFile ppm = new PpmFile("outex.pdf/Image4.ppm");
-		System.out.println("Got PPM width: " + ppm.getWidth());
-		System.out.println("Got PPM height: " + ppm.getHeight());
-		System.out.println(ppm.getPixel(1, 1));
-		System.out.println(ppm.getPixel(100, 100));
-		System.out.println(ppm.getPixel(1000, 1000));
 
 		// great!
 		// now try to read out a version 3 QR code...
@@ -52,7 +49,6 @@ public class Main {
 		QrCode code = new QrCode(3);
 		for (int x = 0; x < code.getWidth(); x++) {
 			for (int y = 0; y < code.getHeight(); y++) {
-				System.out.println("[" + (offsetX + x + enlargeX) + ", " + (offsetY + y + enlargeY) + "]: " + ppm.getPixel(offsetX + x + enlargeX, offsetY + y + enlargeY).isDark());
 				code.setDatapoint(x, y, ppm.getPixel(offsetX + x + enlargeX, offsetY + y + enlargeY).isDark());
 				if (y % 4 != 3) {
 					enlargeY++;
