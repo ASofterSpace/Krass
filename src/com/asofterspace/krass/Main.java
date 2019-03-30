@@ -6,6 +6,7 @@ package com.asofterspace.krass;
 
 import com.asofterspace.toolbox.barcodes.QrCode;
 import com.asofterspace.toolbox.io.BinaryFile;
+import com.asofterspace.toolbox.io.DefaultImageFile;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.PdfFile;
@@ -80,6 +81,15 @@ public class Main {
 		outFile.save();
 
 
+
+		for (int i = 1; i < 4; i++) {
+			DefaultImageFile inFile1 = new DefaultImageFile("pic" + i + ".png");
+			PpmFile outFile1 = new PpmFile("pic" + i + ".ppm");
+			outFile1.assign(inFile1.getImage());
+			outFile1.save();
+		}
+
+
 		// addDisclaimerToProject("D:/prog/asofterspace/CdmScriptEditor/src");
 
 		/*
@@ -120,6 +130,11 @@ public class Main {
 
 	private static void exportPicsFromPdf(String pdfPath) {
 
+		PdfFile pdf = new PdfFile(pdfPath);
+		Directory targetDir = new Directory("out" + pdfPath);
+		pdf.exportPictures(targetDir);
+
+		/*
 		PdfFile pdf = new PdfFile(pdfPath);
 		List<PdfObject> objects = pdf.getObjects();
 
@@ -171,6 +186,7 @@ public class Main {
 				}
 			}
 		}
+		*/
 	}
 
 	private static void replacePicsInPdf(String origPdfPath, String newPdfPath, String newPicPath) {
