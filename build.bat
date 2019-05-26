@@ -1,6 +1,6 @@
 IF NOT EXIST ..\Toolbox-Java\ (
 	echo "It looks like you did not yet get the Toolbox-Java project - please do so (and put it as a folder next to this folder.)"
-	EXIT
+	EXIT 1
 )
 
 cd src\com\asofterspace
@@ -38,7 +38,5 @@ cd src
 dir /s /B *.java > sourcefiles.list
 
 javac -deprecation -Xlint:all -encoding utf8 -d ../bin @sourcefiles.list
-
-cd ..
 
 pause
