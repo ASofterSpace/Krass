@@ -33,6 +33,18 @@ public class Main {
 		Utils.setVersionNumber(VERSION_NUMBER);
 		Utils.setVersionDate(VERSION_DATE);
 
+		if (args.length > 0) {
+			if (args[0].equals("--version")) {
+				System.out.println(Utils.getFullProgramIdentifierWithDate());
+				return;
+			}
+
+			if (args[0].equals("--version_for_zip")) {
+				System.out.println("version " + Utils.getVersionNumber());
+				return;
+			}
+		}
+
 		exportPicsFromPdf("ex.pdf");
 
 		PpmFile ppm = new PpmFile("outex.pdf/Image4.ppm");
