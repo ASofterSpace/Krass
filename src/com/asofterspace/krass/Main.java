@@ -5,6 +5,7 @@
 package com.asofterspace.krass;
 
 import com.asofterspace.toolbox.barcodes.QrCode;
+import com.asofterspace.toolbox.barcodes.QrCodeFactory;
 import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.DefaultImageFile;
 import com.asofterspace.toolbox.io.Directory;
@@ -23,8 +24,8 @@ import java.util.List;
 public class Main {
 
 	public final static String PROGRAM_TITLE = "Krass";
-	public final static String VERSION_NUMBER = "0.0.0.3(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "8. December 2018 - 27. March 2019";
+	public final static String VERSION_NUMBER = "0.0.0.4(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "8. December 2018 - 2. November 2019";
 
 	public static void main(String[] args) {
 
@@ -100,6 +101,18 @@ public class Main {
 			outFile1.assign(inFile1.getImage());
 			outFile1.save();
 		}
+
+
+		DefaultImageFile qrImgFile = new DefaultImageFile("qrpic1.png");
+		Image qrImg = qrImgFile.getImage();
+		QrCode qrReadOut = QrCodeFactory.readFromQrImage(qrImg);
+		System.out.println("Read out qrpic1.png, containing: " + qrReadOut.getContent());
+
+		QrCode outCode = QrCodeFactory.createFromString("https://www.asofterspace.com/");
+		PpmFile outCodeFile = new PpmFile("qroutpic1.ppm");
+		outCodeFile.assign(outCode.toImage());
+		outCodeFile.save();
+		System.out.println("Created qroutpic1.png, containing: " + outCode.getContent());
 
 
 		// addDisclaimerToProject("D:/prog/asofterspace/CdmScriptEditor/src");
