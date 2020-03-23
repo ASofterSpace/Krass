@@ -10,12 +10,16 @@ import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.DefaultImageFile;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
-import com.asofterspace.toolbox.io.PdfFile;
-import com.asofterspace.toolbox.io.PdfObject;
+import com.asofterspace.toolbox.io.JSON;
+import com.asofterspace.toolbox.io.JsonFile;
+import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.PpmFile;
 import com.asofterspace.toolbox.io.SimpleFile;
+import com.asofterspace.toolbox.pdf.PdfFile;
+import com.asofterspace.toolbox.pdf.PdfObject;
 import com.asofterspace.toolbox.utils.ColorRGB;
 import com.asofterspace.toolbox.utils.Image;
+import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.Utils;
 
 import java.util.List;
@@ -24,8 +28,8 @@ import java.util.List;
 public class Main {
 
 	public final static String PROGRAM_TITLE = "Krass";
-	public final static String VERSION_NUMBER = "0.0.0.4(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "8. December 2018 - 2. November 2019";
+	public final static String VERSION_NUMBER = "0.0.0.5(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "8. December 2018 - 23. March 2020";
 
 	public static void main(String[] args) {
 
@@ -46,6 +50,26 @@ public class Main {
 			}
 		}
 
+		JsonFile jsonIn = new JsonFile("in.json");
+		try {
+			JSON json = jsonIn.getAllContents();
+
+			// now check for the interior element "uniqueIdentifier": "6abe85db-633c-11ea-acad-fb7c401fce62",
+			// every location where this occurs, and report it!
+			json.linkDoubly();
+			List<Record> foundRecs = json.searchForKeyValue("uniqueIdentifier", "6abe85db-633c-11ea-acad-fb7c401fce62");
+			for (Record foundRec : foundRecs) {
+				System.out.println(foundRec.getPath());
+			}
+
+			JsonFile jsonOut = new JsonFile("out.json");
+			jsonOut.setAllContents(json);
+			jsonOut.save();
+		} catch (JsonParseException e) {
+			System.err.println("Could not parse in.json! " + e);
+		}
+
+		/*
 		exportPicsFromPdf("ex.pdf");
 
 		PpmFile ppm = new PpmFile("outex.pdf/Image4.ppm");
@@ -116,6 +140,7 @@ public class Main {
 
 
 		// addDisclaimerToProject("D:/prog/asofterspace/CdmScriptEditor/src");
+		*/
 
 		/*
 		PdfFile pdf = new PdfFile("blubb.pdf");
