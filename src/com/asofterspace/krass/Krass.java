@@ -4,12 +4,6 @@
  */
 package com.asofterspace.krass;
 
-import com.asofterspace.toolbox.barcodes.QrCode;
-import com.asofterspace.toolbox.barcodes.QrCodeFactory;
-import com.asofterspace.toolbox.images.ColorRGB;
-import com.asofterspace.toolbox.images.DefaultImageFile;
-import com.asofterspace.toolbox.images.Image;
-import com.asofterspace.toolbox.images.PpmFile;
 import com.asofterspace.toolbox.io.BinaryFile;
 import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
@@ -25,7 +19,7 @@ import com.asofterspace.toolbox.Utils;
 import java.util.List;
 
 
-public class Main {
+public class Krass {
 
 	public final static String PROGRAM_TITLE = "Krass";
 	public final static String VERSION_NUMBER = "0.0.0.6(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
