@@ -318,6 +318,8 @@ public class Krass {
 
 			String nextDebugLineStart = null;
 			String nextDebugLinePath = null;
+			List<String> nextDebugArguments = null;
+			String lastDebugArgument = null;
 			List<String> newContent = new ArrayList<>();
 			for (String line : sFile.getContents()) {
 				newContent.add(line);
@@ -334,6 +336,31 @@ public class Krass {
 					nextDebugLinePath = trimLine.substring(7);
 					nextDebugLinePath = nextDebugLinePath.substring(0, nextDebugLinePath.indexOf("\""));
 				}
+				if (trimLine.startsWith("public ") && trimLine.contains("(")) {
+					nextDebugArguments = new ArrayList<>();
+					trimLine = trimLine.substring(trimLine.indexOf("(") + 1);
+				}
+				if (nextDebugArguments != null) {
+					while (trimLine.contains(",")) {
+						String beforeComma = trimLine.substring(0, trimLine.indexOf(","));
+						beforeComma = beforeComma.trim();
+						if (beforeComma.contains(" ")) {
+							beforeComma = beforeComma.substring(beforeComma.lastIndexOf(" ") + 1);
+						}
+						nextDebugArguments.add(beforeComma);
+						trimLine = trimLine.substring(trimLine.indexOf(",")+1);
+					}
+					if (trimLine.contains(")")) {
+						String beforeComma = trimLine.substring(0, trimLine.lastIndexOf(")"));
+						beforeComma = beforeComma.trim();
+						if (beforeComma.contains(" ")) {
+							beforeComma = beforeComma.substring(beforeComma.lastIndexOf(" ") + 1);
+						}
+						if (!"".equals(beforeComma)) {
+							lastDebugArgument = beforeComma;
+						}
+					}
+				}
 				if (trimLine.endsWith("{")) {
 					if (nextDebugLineStart != null) {
 						String nextDebugLine = "        " + nextDebugLineStart;
@@ -342,11 +369,21 @@ public class Krass {
 						} else {
 							nextDebugLine += "\"" + nextDebugLinePath + "\"";
 						}
+						if (nextDebugArguments != null) {
+							for (String arg : nextDebugArguments) {
+								nextDebugLine += ", " + arg;
+							}
+						}
+						if (lastDebugArgument != null) {
+							nextDebugLine += ", " + lastDebugArgument;
+						}
 						nextDebugLine += ");";
 						newContent.add(nextDebugLine);
 					}
 					nextDebugLineStart = null;
 					nextDebugLinePath = null;
+					nextDebugArguments = null;
+					lastDebugArgument = null;
 				}
 			}
 			sFile.saveContents(newContent);
