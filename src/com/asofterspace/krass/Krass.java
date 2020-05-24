@@ -16,14 +16,15 @@ import com.asofterspace.toolbox.pdf.PdfObject;
 import com.asofterspace.toolbox.utils.Record;
 import com.asofterspace.toolbox.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class Krass {
 
 	public final static String PROGRAM_TITLE = "Krass";
-	public final static String VERSION_NUMBER = "0.0.0.6(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "8. December 2018 - 30. March 2020";
+	public final static String VERSION_NUMBER = "0.0.0.7(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "8. December 2018 - 23. May 2020";
 
 	public static void main(String[] args) {
 
@@ -44,24 +45,11 @@ public class Krass {
 			}
 		}
 
-		JsonFile jsonIn = new JsonFile("in.json");
-		try {
-			JSON json = jsonIn.getAllContents();
 
-			// now check for the interior element "uniqueIdentifier": "6abe85db-633c-11ea-acad-fb7c401fce62",
-			// every location where this occurs, and report it!
-			json.linkDoubly();
-			List<Record> foundRecs = json.searchForKeyValue("uniqueIdentifier", "6abe85db-633c-11ea-acad-fb7c401fce62");
-			for (Record foundRec : foundRecs) {
-				System.out.println(foundRec.getPath());
-			}
+		addDebugToJsBridge();
 
-			JsonFile jsonOut = new JsonFile("out.json");
-			jsonOut.setAllContents(json);
-			jsonOut.save();
-		} catch (JsonParseException e) {
-			System.err.println("Could not parse in.json! " + e);
-		}
+		/*
+		searchForKeyValue();
 
 		/*
 		exportPicsFromPdf("ex.pdf");
@@ -280,6 +268,90 @@ public class Krass {
 		}
 
 		pdf.save();
+	}
+
+	private static void searchForKeyValue() {
+
+		JsonFile jsonIn = new JsonFile("in.json");
+		try {
+			JSON json = jsonIn.getAllContents();
+
+			// now check for the interior element "uniqueIdentifier": "6abe85db-633c-11ea-acad-fb7c401fce62",
+			// every location where this occurs, and report it!
+			json.linkDoubly();
+			List<Record> foundRecs = json.searchForKeyValue("uniqueIdentifier", "6abe85db-633c-11ea-acad-fb7c401fce62");
+			for (Record foundRec : foundRecs) {
+				System.out.println(foundRec.getPath());
+			}
+
+			JsonFile jsonOut = new JsonFile("out.json");
+			jsonOut.setAllContents(json);
+			jsonOut.save();
+		} catch (JsonParseException e) {
+			System.err.println("Could not parse in.json! " + e);
+		}
+	}
+
+	private static void addDebugToJsBridge() {
+
+		Directory restRoot = new Directory("C:\\home\\a softer space\\worky work\\egs-cc\\recoded web app\\jsbridge\\impl\\co.recoded.egscc.server\\src\\main\\java\\co\\recoded\\egscc\\rest");
+
+		boolean recursively = true;
+
+		List<File> restFiles = restRoot.getAllFiles(recursively);
+
+		List<String> methods = new ArrayList<>();
+		methods.add("GET");
+		methods.add("POST");
+		methods.add("PUT");
+		methods.add("DELETE");
+
+		for (File restFile : restFiles) {
+			SimpleFile sFile = new SimpleFile(restFile);
+			String content = sFile.getContent();
+			int startIndex = content.indexOf("\n@Path(\"");
+			if (startIndex < 0) {
+				continue;
+			}
+			String path = content.substring(startIndex + 8);
+			path = path.substring(0, path.indexOf("\""));
+
+			String nextDebugLineStart = null;
+			String nextDebugLinePath = null;
+			List<String> newContent = new ArrayList<>();
+			for (String line : sFile.getContents()) {
+				newContent.add(line);
+				String trimLine = line.trim();
+				if (trimLine.startsWith("package ")) {
+					newContent.add("import co.recoded.egscc.utils.DebugLog;");
+				}
+				for (String method : methods) {
+					if (trimLine.equals("@" + method)) {
+						nextDebugLineStart = "DebugLog.logRestCall(\"" + method + "\", \"" + path + "\", ";
+					}
+				}
+				if (trimLine.startsWith("@Path(\"")) {
+					nextDebugLinePath = trimLine.substring(7);
+					nextDebugLinePath = nextDebugLinePath.substring(0, nextDebugLinePath.indexOf("\""));
+				}
+				if (trimLine.endsWith("{")) {
+					if (nextDebugLineStart != null) {
+						String nextDebugLine = "        " + nextDebugLineStart;
+						if (nextDebugLinePath == null) {
+							nextDebugLine += "\"\"";
+						} else {
+							nextDebugLine += "\"" + nextDebugLinePath + "\"";
+						}
+						nextDebugLine += ");";
+						newContent.add(nextDebugLine);
+					}
+					nextDebugLineStart = null;
+					nextDebugLinePath = null;
+				}
+			}
+			sFile.saveContents(newContent);
+		}
+
 	}
 
 }
