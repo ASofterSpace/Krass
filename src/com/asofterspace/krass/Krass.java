@@ -11,6 +11,7 @@ import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.SimpleFile;
+import com.asofterspace.toolbox.io.XML;
 import com.asofterspace.toolbox.pdf.PdfFile;
 import com.asofterspace.toolbox.pdf.PdfObject;
 import com.asofterspace.toolbox.utils.Record;
@@ -23,8 +24,8 @@ import java.util.List;
 public class Krass {
 
 	public final static String PROGRAM_TITLE = "Krass";
-	public final static String VERSION_NUMBER = "0.0.0.7(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "8. December 2018 - 23. May 2020";
+	public final static String VERSION_NUMBER = "0.0.0.8(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "8. December 2018 - 27. August 2020";
 
 	public static void main(String[] args) {
 
@@ -46,7 +47,54 @@ public class Krass {
 		}
 
 
-		addDebugToJsBridge();
+		SimpleFile file = new SimpleFile("C:/Users/Moyaccercchi/Downloads/2019-dec-html.html");
+		List<String> lines = file.getContents();
+
+		List<String> output1 = new ArrayList<>();
+		List<String> output2 = new ArrayList<>();
+		String curOutput1 = null;
+		String curOutput2 = null;
+		for (String line : lines) {
+			if (line.startsWith("<p style") && line.contains("px;left:145px;white-space:nowrap")) {
+				line = line.substring(line.indexOf(">") + 1);
+				line = line.substring(0, line.indexOf("<"));
+				line = XML.unescapeXMLstr(line);
+				if (curOutput1 == null) {
+					curOutput1 = line;
+					curOutput2 = "";
+				} else {
+					if (curOutput1.endsWith("-")) {
+						curOutput1 = curOutput1.substring(0, curOutput1.length() - 1);
+					}
+					curOutput1 += line;
+				}
+			} else if (line.startsWith("<p style") && line.contains("px;left:247px;white-space:nowrap") && (curOutput2 != null)) {
+				line = line.substring(line.indexOf(">") + 1);
+				line = line.substring(0, line.indexOf("<"));
+				line = XML.unescapeXMLstr(line);
+				if (curOutput2.endsWith("-")) {
+					curOutput2 = curOutput2.substring(0, curOutput2.length() - 1);
+				}
+				curOutput2 += line;
+			} else {
+				if (curOutput1 != null) {
+					output1.add(curOutput1);
+					output2.add(curOutput2);
+				}
+				curOutput1 = null;
+				curOutput2 = null;
+			}
+		}
+		SimpleFile outputFile1 = new SimpleFile("out1.txt");
+		outputFile1.saveContents(output1);
+		System.out.println("Wrote output to " + outputFile1.getAbsoluteFilename());
+		SimpleFile outputFile2 = new SimpleFile("out2.txt");
+		outputFile2.saveContents(output2);
+		System.out.println("Wrote output to " + outputFile2.getAbsoluteFilename());
+
+		// uncompressPdf("C:/home/2019-dec.pdf", "C:/home/2019-dec-moya.pdf");
+
+		// addDebugToJsBridge();
 
 		/*
 		searchForKeyValue();
@@ -265,6 +313,11 @@ public class Krass {
 
 		for (PdfObject obj : objects) {
 			obj.uncompress();
+			try {
+				System.out.println(obj.getPlainStreamContent());
+			} catch (Exception e) {
+				// whoops!
+			}
 		}
 
 		pdf.save();
