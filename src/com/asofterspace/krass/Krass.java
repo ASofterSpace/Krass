@@ -11,7 +11,6 @@ import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.SimpleFile;
-import com.asofterspace.toolbox.io.XML;
 import com.asofterspace.toolbox.pdf.PdfFile;
 import com.asofterspace.toolbox.pdf.PdfObject;
 import com.asofterspace.toolbox.utils.Record;
@@ -47,6 +46,16 @@ public class Krass {
 		}
 
 
+		Directory parentDir = new Directory("C:/home/send Jayem");
+		List<File> files = parentDir.getAllFilesEndingWith(".stpu", true);
+		for (File file : files) {
+			String oldName = file.getLocalFilename();
+			String newName = oldName.substring(0, oldName.length() - 5) + ".txt";
+			file.rename(newName);
+		}
+
+
+/*
 		SimpleFile file = new SimpleFile("C:/Users/Moyaccercchi/Downloads/2019-dec-html.html");
 		List<String> lines = file.getContents();
 
