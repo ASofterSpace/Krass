@@ -29,6 +29,7 @@ src/sourcefiles.list
 
 # external dependencies (with their own repositories and life cycles)
 src/com/asofterspace/toolbox
+AsymmetricCryptographyController.java
 
 # config files
 config
@@ -40,4 +41,6 @@ config
 *.json
 *.csv
 *.txt
+*.xml
 /Pictures
+/proc_out

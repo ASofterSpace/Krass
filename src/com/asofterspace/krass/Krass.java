@@ -11,9 +11,12 @@ import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.JsonParseException;
 import com.asofterspace.toolbox.io.SimpleFile;
+import com.asofterspace.toolbox.io.TextFile;
 import com.asofterspace.toolbox.pdf.PdfFile;
 import com.asofterspace.toolbox.pdf.PdfObject;
+import com.asofterspace.toolbox.utils.DateUtils;
 import com.asofterspace.toolbox.utils.Record;
+import com.asofterspace.toolbox.utils.StrUtils;
 import com.asofterspace.toolbox.Utils;
 
 import java.util.ArrayList;
@@ -23,10 +26,12 @@ import java.util.List;
 public class Krass {
 
 	public final static String PROGRAM_TITLE = "Krass";
-	public final static String VERSION_NUMBER = "0.0.0.8(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "8. December 2018 - 27. August 2020";
+	public final static String VERSION_NUMBER = "0.0.0.9(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "8. December 2018 - 26. January 2022";
 
-	public static void main(String[] args) {
+	public static AsymmetricCryptographyController cryptographyController;
+
+	public static void main(String[] args) throws Exception {
 
 		// let the Utils know in what program it is being used
 		Utils.setProgramTitle(PROGRAM_TITLE);
@@ -46,6 +51,207 @@ public class Krass {
 		}
 
 
+		SimpleFile inputFile = new SimpleFile("C:\\home\\datacomx\\Desktop\\system\\CardOrg\\World 2.stpu");
+		inputFile.setISOorUTFreadAndUTFwriteEncoding(true);
+		TextFile outputFile = new TextFile("C:\\home\\out.json");
+		JSON output = new JSON(Record.emptyArray());
+
+		List<String> contents = inputFile.getContents();
+		String lastDateStr = null;
+		int lastTimeHour = 9;
+		int i = 0;
+
+		while (true) {
+			String dateStr = contents.get(i * 3);
+			String locationStr = contents.get((i * 3) + 1);
+			if (dateStr.equals("%")) {
+				break;
+			}
+			i++;
+
+			if (dateStr.equals(lastDateStr)) {
+				lastTimeHour++;
+			} else {
+				lastTimeHour = 9;
+			}
+
+			Record cur = Record.emptyObject();
+			cur.set("date", DateUtils.parseDate(dateStr));
+			cur.set("time", StrUtils.leftPad0(""+lastTimeHour, 2) + ":00");
+			cur.set("where", locationStr);
+			output.append(cur);
+
+			lastDateStr = dateStr;
+		}
+
+		outputFile.saveContent(StrUtils.replaceAll(output.toString(false), " 00:00:00.000", ""));
+
+		/*
+		Directory logsDir = new Directory("C:\\home\\workbench-angepasst\\logs");
+		Directory outDir = new Directory("C:\\home\\workbench-angepasst\\new");
+		boolean recursively = false;
+		List<File> logFiles = logsDir.getAllFilesEndingWith(".json", recursively);
+		int id = 6436;
+
+		for (File logFile : logFiles) {
+			JsonFile logFileJson = new JsonFile(logFile);
+			try {
+				Record rec = logFileJson.getAllContents();
+				rec.set("id", id);
+				JsonFile outFile = new JsonFile(outDir, id + ".json");
+				outFile.save(rec);
+
+				String fileName = logFileJson.getCanonicalFilename();
+				if (fileName.endsWith(".json")) {
+					fileName = fileName.substring(0, fileName.length() - 5);
+				}
+				Directory oldDir = new Directory(fileName);
+				if (oldDir.exists()) {
+					oldDir.copyToDisk(new Directory(outDir, ""+id));
+				}
+
+			} catch (JsonParseException e) {
+				System.err.println("The log entry " + logFile.getAbsoluteFilename() + " could not be loaded!");
+				e.printStackTrace(System.err);
+			}
+			id++;
+		}
+		*/
+
+
+
+		/*
+
+		// read in a file and convert it to a useful srt file
+		SimpleFile srtInputFile = new SimpleFile("sub1.txt");
+		List<String> lines = srtInputFile.getContents();
+		StringBuilder output = new StringBuilder();
+		String fromTo = "";
+		int lineIndex = 0;
+		String curLines = "";
+		int num = 1;
+		for (String line : lines) {
+			if ("".equals(line)) {
+				if (!"".equals(curLines)) {
+					output.append(num + "\r\n");
+					String from = fromTo.substring(0, fromTo.indexOf(" --> "));
+					String to = fromTo.substring(fromTo.indexOf(" --> ") + 5);
+					double fromDouble = StrUtils.strToDouble(from) + 0.75;
+					double toDouble = StrUtils.strToDouble(to) + 1.5;
+					output.append(secondToTimestamp(fromDouble) + " --> " + secondToTimestamp(toDouble) + "\r\n");
+					output.append(curLines + "\r\n");
+					num++;
+				}
+				lineIndex = 0;
+				curLines = "";
+				continue;
+			}
+			if (lineIndex > 0) {
+				curLines += line + "\r\n";
+				lineIndex++;
+			}
+			if (lineIndex == 0) {
+				fromTo = line;
+				lineIndex++;
+			}
+		}
+		if (!"".equals(curLines)) {
+		}
+		TextFile outputFile = new TextFile("out1.txt");
+		outputFile.saveContent(output.toString());
+
+/*
+		// read in a different kind of file and convert it to a useful srt file
+		SimpleFile srtInputFile = new SimpleFile("sub2.txt");
+		List<String> lines = srtInputFile.getContents();
+		StringBuilder output = new StringBuilder();
+		int prevSeconds = 0;
+		int curSeconds = 0;
+		int nextSeconds = 0;
+		int lineIndex = 0;
+		String curLines = "";
+		String prevCurLines = "";
+		int num = 1;
+		for (String line : lines) {
+			if ("".equals(line)) {
+				if (!"".equals(prevCurLines)) {
+					output.append(num + "\r\n");
+					System.out.println("prevCurLines: " + prevCurLines);
+					int endTime = Math.min(curSeconds + 10, nextSeconds);
+					output.append(secondToTimestamp(curSeconds) + " --> " + secondToTimestamp(endTime) + "\r\n");
+					output.append(prevCurLines + "\r\n");
+					num++;
+				}
+				lineIndex = 0;
+				prevSeconds = curSeconds;
+				curSeconds = nextSeconds;
+				prevCurLines = curLines;
+				curLines = "";
+				continue;
+			}
+			if (lineIndex > 0) {
+				curLines += line + "\r\n";
+				lineIndex++;
+			}
+			if (lineIndex == 0) {
+				nextSeconds = StrUtils.strToInt(line);
+				System.out.println("nextSec: " + nextSeconds);
+				lineIndex++;
+			}
+		}
+		if (!"".equals(prevCurLines)) {
+			output.append(num + "\r\n");
+			int endTime = Math.min(curSeconds + 10, nextSeconds);
+			output.append(secondToTimestamp(curSeconds) + " --> " + secondToTimestamp(endTime) + "\r\n");
+			output.append(prevCurLines + "\r\n");
+			num++;
+		}
+		if (!"".equals(curLines)) {
+			output.append(num + "\r\n");
+			int endTime = nextSeconds + 10;
+			output.append(secondToTimestamp(nextSeconds) + " --> " + secondToTimestamp(endTime) + "\r\n");
+			output.append(curLines + "\r\n");
+			num++;
+		}
+		TextFile outputFile = new TextFile("out2.txt");
+		outputFile.saveContent(output.toString());
+
+
+
+/*
+		TextFile prcFile = new TextFile("PRC.xml");
+		String prcContent = prcFile.getContent();
+		List<String> procedures = StrUtils.extractAll(prcContent,
+			"<attr name=\"I1_STSPRC_Procedure::procSource_p.XString::x\">", "</attr>");
+		for (String proc : procedures) {
+			proc = XML.unescapeXMLstr(proc);
+			String procName = StrUtils.extract(proc, "\nPROCEDURE ", "\n");
+			TextFile outFile = new TextFile("proc_out/" + procName + ".STL");
+			outFile.saveContent(proc);
+		}
+
+/*
+		cryptographyController = new AsymmetricCryptographyController();
+
+		TextFile outFile = new TextFile("publickey.txt");
+		String key = cryptographyController.getRandomPublicKey();
+		outFile.saveContent(key);
+
+		while (true) {
+			TextFile inFile = new TextFile("encpassword.txt");
+			if (inFile.exists()) {
+				String content = inFile.getContent().trim();
+				if (!"".equals(content)) {
+					decryptOrThrow(inFile.getContent().trim(), key);
+					inFile.delete();
+				}
+			}
+			Utils.sleep(3000);
+		}
+
+
+
+/*
 		Directory parentDir = new Directory("C:/home/send Jayem");
 		List<File> files = parentDir.getAllFilesEndingWith(".stpu", true);
 		for (File file : files) {
@@ -192,6 +398,76 @@ public class Krass {
 
 		uncompressPdf("ex_compressed.pdf", "ex_uncompressed.pdf");
 		*/
+
+				/*
+				Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+				for (Mixer.Info mixerInfo : mixers) {
+					System.out.println("mixer: " + mixerInfo.getName());
+					if (!mixerInfo.getName().startsWith("Lautsprecher/Kopf")) {
+						continue;
+					}
+					Mixer mixer = AudioSystem.getMixer(mixerInfo);
+					Line.Info[] lineInfos = mixer.getSourceLineInfo();
+					for (Line.Info lineInfo : lineInfos) {
+						System.out.println("line: " + lineInfo.toString());
+						try {
+							Line line = mixer.getLine(lineInfo);
+
+							boolean opened = line.isOpen();
+							if (!(line instanceof Clip)) {
+								if (!opened){
+									line.open();
+								}
+							}
+							Control[] controls = line.getControls();
+							for (Control contr : controls) {
+								applyVolumeToControl(contr, false, position);
+							}
+						} catch (LineUnavailableException e) {
+							e.printStackTrace();
+						} catch (IllegalArgumentException iaEx)
+						{
+							System.out.println("    " + iaEx);
+						}
+					}
+				}
+				*/
+	}
+
+	/*
+	private void applyVolumeToControl(Control contr, boolean on, int volume) {
+
+		System.out.println("control: " + contr);
+
+		if (contr instanceof FloatControl) {
+			if (contr.toString().startsWith("Master Gain") || contr.toString().startsWith("Volume")) {
+				FloatControl volumeCtrl = (FloatControl) contr;
+				float max = volumeCtrl.getMaximum();
+				float min = volumeCtrl.getMinimum();
+				float newVal = min + ((volume * (max - min)) / 100);
+				System.out.println("Setting value to: " + newVal);
+				volumeCtrl.setValue(newVal);
+			}
+		}
+
+		if (contr instanceof BooleanControl) {
+			BooleanControl onOffCtrl = (BooleanControl) contr;
+			onOffCtrl.setValue(on);
+			System.out.println("Setting value to: " + on);
+		}
+
+		if (contr instanceof CompoundControl) {
+			CompoundControl volCtrl = (CompoundControl) contr;
+			Control[] members = volCtrl.getMemberControls();
+			for (Control member : members) {
+				applyVolumeToControl(member, on, volume);
+			}
+		}
+	}
+	*/
+
+	private static String decryptOrThrow(String message, String key) throws Exception {
+		return cryptographyController.decryptText(message, key);
 	}
 
 	private static void addDisclaimerToProject(String projectPath) {
@@ -451,6 +727,23 @@ public class Krass {
 			sFile.saveContents(newContent);
 		}
 
+	}
+
+	private static String secondToTimestamp(double secondDouble) {
+		int second = (int) Math.floor(secondDouble);
+		String mmm = StrUtils.leftPad0("" + (((int) Math.floor(secondDouble * 1000)) % 1000), 3);
+		String ss = StrUtils.leftPad0("" + (second % 60), 2);
+		String mm = StrUtils.leftPad0("" + ((second / 60) % 60), 2);
+		String hh = StrUtils.leftPad0("" + ((second / (60*60)) % 60), 2);
+		return hh + ":" + mm + ":" + ss + "," + mmm;
+	}
+
+	private static String secondToTimestamp(int second) {
+		String mmm = "000";
+		String ss = StrUtils.leftPad0("" + (second % 60), 2);
+		String mm = StrUtils.leftPad0("" + ((second / 60) % 60), 2);
+		String hh = StrUtils.leftPad0("" + ((second / (60*60)) % 60), 2);
+		return hh + ":" + mm + ":" + ss + "," + mmm;
 	}
 
 }
